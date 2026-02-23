@@ -1,0 +1,58 @@
+defaults:
+  - model: transformer
+  - data: fineweb10B
+  - _self_
+
+training:
+  steps_budget: 5000
+  eval_every_steps: 200
+  log_every_steps: 10
+  grad_accumulation_steps: 1
+  # Optimizer
+  optim: adamw
+  fused_optim: false
+  lr: 3e-4
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  grad_clip: 1.0
+  eps: 1e-8
+  # Scheduler
+  scheduler: warmup_cosine
+  warmup_steps: 200
+  cooldown_steps: null
+  lr_start: 0.0
+  lr_end: 3e-5
+  lr_end_pct: null
+  # Early stopping
+  early_stopping_patience: 0
+
+system:
+  dtype: bfloat16
+  compile_model: false
+  seed: 1337
+  ddp_backend: nccl
+
+logging:
+  wandb_log: true
+  wandb_project: quark
+  wandb_log_layer_stats: false
+
+checkpoint:
+  save_last_checkpoint: true
+  save_intermediate_checkpoints: false
+  save_every_steps: null
+  resume: false
+  resume_step: null
+  resume_exp_name: null
+  over_write: true
+  exp_name: default
+
+out_dir: /fast/pnazari/quark
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null

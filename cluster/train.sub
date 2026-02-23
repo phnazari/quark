@@ -1,0 +1,14 @@
+executable = /home/pnazari/cluster/htcondor/cuda_wrapper.sh
+arguments  = /lustre/home/pnazari/workspace/quark/cluster/train.sh
+initialdir = /lustre/home/pnazari/workspace/quark
+
+output = /fast/pnazari/quark/logs/$(Cluster)_$(Process).out
+error  = /fast/pnazari/quark/logs/$(Cluster)_$(Process).err
+log    = /fast/pnazari/quark/logs/$(Cluster)_$(Process).log
+
+request_memory = 32000
+request_cpus   = 16
+request_gpus   = 4
+requirements   = (TARGET.CUDAGlobalMemoryMb > 64000)
+
+queue
