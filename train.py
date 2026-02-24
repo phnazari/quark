@@ -72,10 +72,13 @@ def main(cfg: DictConfig):  # noqa: C901
     if master_process:
         num_params = sum(p.numel() for p in model.parameters())
         print("=" * 80)
-        print("Training Transformer GPT")
+        print(f"Training {cfg.model.model_type}")
         print(f"  Device: {device}, dtype: {cfg.system.dtype}")
         print(f"  Hidden: {config.hidden_size}, Layers: {config.num_layers}")
-        print(f"  Heads: {config.num_heads}, Head dim: {config.head_dim}")
+        if hasattr(config, "head_dim"):
+            print(f"  Heads: {config.num_heads}, Head dim: {config.head_dim}")
+        else:
+            print(f"  Heads: {config.num_heads}")
         print(f"  Parameters: {num_params:,}")
         print(f"  Steps budget: {flat_cfg.steps_budget}")
         print("=" * 80)
