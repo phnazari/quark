@@ -103,7 +103,7 @@ def main(cfg: DictConfig):  # noqa: C901
         run_id = uuid.uuid4().hex[:6]
         wandb.init(
             project=cfg.logging.wandb_project,
-            name=f"transformer-L{cfg.model.num_layers}-D{cfg.model.hidden_size}-lr{cfg.training.lr}-{run_id}",
+            name=f"{cfg.model.model_type}-L{cfg.model.num_layers}-D{cfg.model.hidden_size}-lr{cfg.training.lr}-{run_id}",
             config={**OmegaConf.to_container(cfg, resolve=True), "num_params": num_params},
         )
         wandb.run.log_code(

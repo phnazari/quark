@@ -18,7 +18,7 @@ def pytorch_setup(cfg):
         local_rank = int(os.environ["LOCAL_RANK"])
         world_size = int(os.environ["WORLD_SIZE"])
         device = f"cuda:{local_rank}"
-        torch.cuda.device(device)
+        torch.cuda.set_device(device)
         master_process = rank == 0
         seed_offset = rank
     else:
