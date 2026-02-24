@@ -1,5 +1,5 @@
 executable = /home/pnazari/cluster/htcondor/cuda_wrapper.sh
-arguments  = /lustre/home/pnazari/workspace/quark/cluster/train.sh
+arguments  = /home/pnazari/.local/bin/uv run python -m torch.distributed.run --standalone --nproc_per_node=4 train.py model=transformer checkpoint.exp_name=checkpoints/transformer
 initialdir = /lustre/home/pnazari/workspace/quark
 
 output = /fast/pnazari/quark/logs/$(Cluster)_$(Process).out
