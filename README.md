@@ -1,6 +1,18 @@
-# Quark
 
-A minimal playground for language modeling research. The goal is to provide a clean, hackable base for training and experimenting with GPT-style models — without the overhead of a large framework. Ships with a standard pre-norm transformer (causal attention + SwiGLU MLP) and a training pipeline built on Hydra, W&B, and DDP.
+<h1 align="center">Quark</h1>
+<p align="center">
+  <img src="assets/logo.png" width="200" alt="quark logo">
+</p>
+
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python 3.12+"></a>
+  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.10+-ee4c2c.svg" alt="PyTorch"></a>
+  <a href="https://github.com/fla-org/flash-linear-attention"><img src="https://img.shields.io/badge/flash--linear--attention-submodule-blueviolet.svg" alt="flash-linear-attention"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p>
+
+A minimal playground for language modeling research. The goal is to provide a clean, hackable base for training and experimenting with GPT-style models — without the overhead of a large framework. Ships with a standard pre-norm transformer (causal attention + SwiGLU MLP) and a training pipeline built on Hydra, W&B, and DDP. This pipeline is adapted from [PlainLM](https://github.com/Niccolo-Ajroldi/plainLM).
+
 
 ## Setup
 
@@ -79,4 +91,21 @@ Print the fully resolved config without running:
 
 Training logs to W&B and optionally saves checkpoints to `out_dir/exp_name` (configured in `configs/config.yaml`).
 
-Training pipeline adapted from [PlainLM](https://github.com/Niccolo-Ajroldi/plainLM).
+## W&B
+
+Before the first run, authenticate:
+
+```bash
+uv run wandb login
+```
+
+The W&B project name and run name are set in `configs/config.yaml`:
+
+```yaml
+logging:
+  wandb_project: quark        # project name on wandb.ai
+  wandb_log: true
+
+checkpoint:
+  exp_name: my_experiment     # also used as the run name in W&B
+```
