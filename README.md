@@ -47,17 +47,33 @@ Download and tokenize FineWeb-Edu 10B into chunked Arrow files. Only needs to be
 
 Config is managed by Hydra (`configs/`). All keys can be overridden from the CLI.
 
+Train the default transformer:
+
 ```bash
-# Single GPU
 .venv/bin/python train.py
+```
 
-# Multi-GPU (DDP)
-torchrun --standalone --nproc_per_node=4 train.py
+Train DeltaNet:
 
-# Override config values
-.venv/bin/python train.py training.lr=1e-4 training.steps_budget=10000
+```bash
+.venv/bin/python train.py model=delta_net
+```
 
-# Print resolved config without running
+Scale to multiple GPUs with DDP:
+
+```bash
+torchrun --standalone --nproc_per_node=4 train.py model=delta_net
+```
+
+Any config value can be overridden from the CLI:
+
+```bash
+.venv/bin/python train.py model=delta_net training.lr=1e-4 training.steps_budget=10000
+```
+
+Print the fully resolved config without running:
+
+```bash
 .venv/bin/python train.py --cfg job
 ```
 
