@@ -4,7 +4,19 @@ A minimal playground for language modeling research. The goal is to provide a cl
 
 ## Setup
 
-Install dependencies into a local virtual environment:
+Clone the repo with submodules (required for flash-linear-attention):
+
+```bash
+git clone --recurse-submodules https://github.com/philippnazari/quark
+```
+
+If you already cloned without `--recurse-submodules`, fetch the submodules with:
+
+```bash
+git submodule update --init --recursive
+```
+
+Then install dependencies:
 
 ```bash
 uv sync
