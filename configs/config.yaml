@@ -7,7 +7,7 @@ training:
   steps_budget: 19064
   eval_every_steps: 200
   log_every_steps: 100
-  grad_accumulation_steps: 1
+  grad_accumulation_steps: 2
   # Optimizer
   optim: adamw
   fused_optim: false
@@ -52,7 +52,7 @@ out_dir: /fast/pnazari/quark
 
 data:
   seq_len: 2048
-  micro_batch_size: 32
+  micro_batch_size: 16
 
 hydra:
   job:
