@@ -14,15 +14,32 @@ import hydra
 from checkpoint_utils import maybe_load_checkpoint, save_checkpoint
 from data import get_dataloaders
 from engine import TorchEngine
-from models import Transformer, TransformerConfig
+from models import DeltaNet, DeltaNetWrapperConfig, Transformer, TransformerConfig
 from omegaconf import DictConfig
 from torch_utils import destroy_ddp, pytorch_setup
 from utils import flatten_config, log, maybe_make_dir, print_master
 
 
 def build_model(cfg: DictConfig, flat_cfg):
-    """Build a Transformer model from config."""
+    """Build a model from config, dispatching on model_type."""
     vocab_size = flat_cfg.vocab_size if hasattr(flat_cfg, "vocab_size") else 50304
+    model_type = cfg.model.model_type
+
+    if model_type == "delta_net":
+        config = DeltaNetWrapperConfig(
+            vocab_size=vocab_size,
+            hidden_size=cfg.model.hidden_size,
+            num_layers=cfg.model.num_layers,
+            num_heads=cfg.model.num_heads,
+            expand_k=cfg.model.expand_k,
+            expand_v=cfg.model.expand_v,
+            use_gate=cfg.model.use_gate,
+            use_beta=cfg.model.use_beta,
+            use_short_conv=cfg.model.use_short_conv,
+            conv_size=cfg.model.conv_size,
+        )
+        return DeltaNet(config), config
+
     config = TransformerConfig(
         vocab_size=vocab_size,
         hidden_size=cfg.model.hidden_size,
@@ -55,12 +72,23 @@ def main(cfg: DictConfig):  # noqa: C901
     if master_process:
         num_params = sum(p.numel() for p in model.parameters())
         print("=" * 80)
-        print("Training Transformer GPT")
+        print(f"Training {cfg.model.model_type}")
         print(f"  Device: {device}, dtype: {cfg.system.dtype}")
         print(f"  Hidden: {config.hidden_size}, Layers: {config.num_layers}")
-        print(f"  Heads: {config.num_heads}, Head dim: {config.head_dim}")
+        if hasattr(config, "head_dim"):
+            print(f"  Heads: {config.num_heads}, Head dim: {config.head_dim}")
+        else:
+            print(f"  Heads: {config.num_heads}")
+        total_tokens = (
+            flat_cfg.steps_budget
+            * flat_cfg.grad_accumulation_steps
+            * flat_cfg.micro_batch_size
+            * flat_cfg.seq_len
+            * world_size
+        )
         print(f"  Parameters: {num_params:,}")
         print(f"  Steps budget: {flat_cfg.steps_budget}")
+        print(f"  Total tokens: {total_tokens:,}")
         print("=" * 80)
 
     engine = TorchEngine(model, flat_cfg, device, local_rank, ckpt)

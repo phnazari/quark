@@ -1,3 +1,4 @@
+model_type: transformer
 hidden_size: 384
 num_layers: 21
 num_heads: 8
