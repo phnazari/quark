@@ -79,8 +79,16 @@ def main(cfg: DictConfig):  # noqa: C901
             print(f"  Heads: {config.num_heads}, Head dim: {config.head_dim}")
         else:
             print(f"  Heads: {config.num_heads}")
+        total_tokens = (
+            flat_cfg.steps_budget
+            * flat_cfg.grad_accumulation_steps
+            * flat_cfg.micro_batch_size
+            * flat_cfg.seq_len
+            * world_size
+        )
         print(f"  Parameters: {num_params:,}")
         print(f"  Steps budget: {flat_cfg.steps_budget}")
+        print(f"  Total tokens: {total_tokens:,}")
         print("=" * 80)
 
     engine = TorchEngine(model, flat_cfg, device, local_rank, ckpt)
