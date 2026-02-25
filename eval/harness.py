@@ -143,8 +143,8 @@ class QuarkLM(HFLM):
 
     @property
     def max_length(self):
-        """Get the maximum sequence length."""
-        # Try to get from config or default to 2048
-        if hasattr(self, "_max_length"):
+        """Get the max length of the model."""
+        # Try to get from kwargs or default to 2048
+        if hasattr(self, "_max_length") and getattr(self, "_max_length") is not None:
             return self._max_length
         return 2048

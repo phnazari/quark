@@ -29,6 +29,7 @@ env/
 
 # Training outputs
 out/
+results/
 
 # Eval cache
 eval/cache/
