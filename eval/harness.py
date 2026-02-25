@@ -129,7 +129,7 @@ class QuarkLM(HFLM):
         else:
             model = model_wrapper
 
-        model.to(device)
+        model.to(device).bfloat16()
         model.eval()
 
         # 2. Initialize HFLM
