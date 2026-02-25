@@ -72,6 +72,7 @@ class QuarkLM(HFLM):
         tokenizer="EleutherAI/gpt-neox-20b",
         device="cuda",
         batch_size=1,
+        dtype="bfloat16",
         **kwargs,
     ):
         # 1. Build model and load checkpoint
@@ -134,7 +135,12 @@ class QuarkLM(HFLM):
         # 2. Initialize HFLM
         # We pass the pre-instantiated model and tokenizer
         super().__init__(
-            pretrained=model, tokenizer=tokenizer, batch_size=batch_size, device=device, **kwargs
+            pretrained=model,
+            tokenizer=tokenizer,
+            batch_size=batch_size,
+            device=device,
+            dtype=dtype,
+            **kwargs,
         )
 
         # Ensure tokenizer has pad token
