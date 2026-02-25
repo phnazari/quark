@@ -8,6 +8,7 @@ dependencies = [
     "datasets>=4.5.0",
     "flash-linear-attention",
     "hydra-core>=1.3.2",
+    "lm-eval>=0.4.11",
     "matplotlib>=3.10.8",
     "pandas>=3.0.0",
     "python-dotenv>=1.2.1",

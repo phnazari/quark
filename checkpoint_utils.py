@@ -12,10 +12,13 @@ def _latest_checkpoint(ckpt_dir: str, prefix: str = "checkpoint_") -> str | None
     if not os.path.isdir(ckpt_dir):
         return None
 
-    checkpoints = [f for f in os.listdir(ckpt_dir) if re.match(rf"^{prefix}\d+$", f)]
-    checkpoints.sort(key=lambda x: int(x[len(prefix) :]))
+    checkpoints = [f for f in os.listdir(ckpt_dir) if re.match(rf"^{prefix}\d+\.pth$", f)]
+    if not checkpoints:
+        return None
 
-    return os.path.join(ckpt_dir, checkpoints[-1]) if checkpoints else None
+    checkpoints.sort(key=lambda x: int(re.search(r"\d+", x).group()))
+
+    return os.path.join(ckpt_dir, checkpoints[-1])
 
 
 def save_checkpoint(step, model, engine, cfg, metrics=None):
