@@ -3,7 +3,7 @@ trainset_path: /fast/pnazari/data/fwedu_sample_10BT/tokenized_EleutherAI_gpt-neo
 validset_path: /fast/pnazari/data/fwedu_sample_10BT/tokenized_EleutherAI_gpt-neox-20b/ctx_2048/valid
 seq_len: 1024
 micro_batch_size: 32
-num_workers: 0
+num_workers: 17
 sampler: stateful_random
 sampler_seed: 42
 eval: true

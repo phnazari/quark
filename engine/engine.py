@@ -37,7 +37,7 @@ class TorchEngine(torch.nn.Module):
         # Move model to device and wrap in DDP
         self.model = model.to(device)
         if torch.distributed.is_initialized():
-            self.model = DDP(self.model, device_ids=[local_rank], find_unused_parameters=True)
+            self.model = DDP(self.model, device_ids=[local_rank], find_unused_parameters=False)
 
         # Compile
         if cfg.compile_model:

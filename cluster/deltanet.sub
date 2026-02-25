@@ -1,0 +1,14 @@
+executable = /home/pnazari/cluster/htcondor/cuda_wrapper.sh
+arguments  = /home/pnazari/.local/bin/uv run python -m torch.distributed.run --standalone --nproc_per_node=8 train.py model=delta_net checkpoint.exp_name=checkpoints/deltanet
+initialdir = /lustre/home/pnazari/workspace/quark
+
+output = /fast/pnazari/quark/logs/$(Cluster)_$(Process).out
+error  = /fast/pnazari/quark/logs/$(Cluster)_$(Process).err
+log    = /fast/pnazari/quark/logs/$(Cluster)_$(Process).log
+
+request_memory = 64000
+request_cpus   = 32
+request_gpus   = 8
+requirements   = (TARGET.CUDAGlobalMemoryMb > 64000)
+
+queue
