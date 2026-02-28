@@ -22,17 +22,17 @@ class TorchEngine(torch.nn.Module):
         self.micro_steps = 0
         self.accumulated_samples = 0
 
-        self.seq_len = cfg.seq_len
-        self.accumulation_steps = cfg.grad_accumulation_steps
-        self.grad_clip = cfg.grad_clip
-        self.dtype = cfg.dtype
+        self.seq_len = cfg.data.seq_len
+        self.accumulation_steps = cfg.training.grad_accumulation_steps
+        self.grad_clip = cfg.training.grad_clip
+        self.dtype = cfg.system.dtype
 
         self.device = device
 
         # Load model state dict if resuming
-        if cfg.resume:
+        if cfg.checkpoint.resume:
             model.load_state_dict(ckpt["state_dict"])
-            self.micro_steps = ckpt["step"] * cfg.grad_accumulation_steps
+            self.micro_steps = ckpt["step"] * cfg.training.grad_accumulation_steps
 
         # Move model to device and wrap in DDP
         self.model = model.to(device)
@@ -40,7 +40,7 @@ class TorchEngine(torch.nn.Module):
             self.model = DDP(self.model, device_ids=[local_rank], find_unused_parameters=False)
 
         # Compile
-        if cfg.compile_model:
+        if cfg.system.compile_model:
             print("Compiling the model...")
             self.model = torch.compile(self.model)
 
@@ -59,11 +59,11 @@ class TorchEngine(torch.nn.Module):
         self.scaler = torch.amp.GradScaler(enabled=(self.dtype == "float16"))
 
         # Optimizer and scheduler
-        param_groups = get_param_groups(model, cfg.weight_decay)
+        param_groups = get_param_groups(model, cfg.training.weight_decay)
         self.optimizer = initialize_optimizer(param_groups, cfg)
         self.scheduler = initialize_scheduler(self.optimizer, cfg)
 
-        if cfg.resume:
+        if cfg.checkpoint.resume:
             self.optimizer.load_state_dict(ckpt["optimizer"])
             if ckpt.get("scheduler"):
                 self.scheduler.load_state_dict(ckpt["scheduler"])

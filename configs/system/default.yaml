@@ -1,0 +1,4 @@
+dtype: bfloat16
+compile_model: false
+seed: 42
+ddp_backend: nccl

@@ -31,7 +31,7 @@ def save_checkpoint(step, model, engine, cfg, metrics=None):
         "scaler": engine.scaler.state_dict(),
     }
 
-    exp_dir = os.path.join(cfg.out_dir, cfg.exp_name)
+    exp_dir = os.path.join(cfg.out_dir, cfg.checkpoint.exp_name)
     os.makedirs(exp_dir, exist_ok=True)
 
     save_path = os.path.join(exp_dir, f"ckpt_step_{step}.pth")
@@ -46,14 +46,18 @@ def save_checkpoint(step, model, engine, cfg, metrics=None):
 
 def maybe_load_checkpoint(cfg):
     """Load a checkpoint if resuming, else return None."""
-    if not cfg.resume:
+    if not cfg.checkpoint.resume:
         return None
 
-    resume_exp_name = cfg.resume_exp_name if cfg.resume_exp_name is not None else cfg.exp_name
+    resume_exp_name = (
+        cfg.checkpoint.resume_exp_name
+        if cfg.checkpoint.resume_exp_name is not None
+        else cfg.checkpoint.exp_name
+    )
     ckpt_dir = os.path.join(cfg.out_dir, resume_exp_name)
 
-    if cfg.resume_step is not None:
-        ckpt_path = os.path.join(ckpt_dir, f"ckpt_step_{cfg.resume_step}.pth")
+    if cfg.checkpoint.resume_step is not None:
+        ckpt_path = os.path.join(ckpt_dir, f"ckpt_step_{cfg.checkpoint.resume_step}.pth")
     else:
         ckpt_path = _latest_checkpoint(ckpt_dir, prefix="ckpt_step_")
 
