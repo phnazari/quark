@@ -32,9 +32,9 @@ def pytorch_setup(cfg):
         elif torch.backends.mps.is_available():
             device = "mps"
 
-    random.seed(cfg.seed + seed_offset)
-    np.random.seed(cfg.seed + seed_offset)
-    torch.manual_seed(cfg.seed + seed_offset)
+    random.seed(cfg.system.seed + seed_offset)
+    np.random.seed(cfg.system.seed + seed_offset)
+    torch.manual_seed(cfg.system.seed + seed_offset)
 
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True

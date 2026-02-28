@@ -3,10 +3,9 @@
 import math
 import os
 import shutil
-from types import SimpleNamespace
 
 import torch
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
 
 def print_master(msg):
@@ -18,14 +17,11 @@ def print_master(msg):
         print(msg)
 
 
-def flatten_config(cfg: DictConfig) -> SimpleNamespace:
-    """Flatten nested Hydra config into a flat namespace."""
-    flat = {}
-    for group in ["model", "data", "training", "system", "logging", "checkpoint"]:
-        if group in cfg:
-            flat.update(OmegaConf.to_container(cfg[group], resolve=True))
-    flat["out_dir"] = cfg.out_dir
-    return SimpleNamespace(**flat)
+def get_variant_name(cfg: DictConfig) -> str:
+    """Derive variant name from model config."""
+    model_type = cfg.model.model_type
+    names = {"transformer": "Transformer", "delta_net": "DeltaNet"}
+    return names.get(model_type, model_type)
 
 
 def get_param_groups(model, weight_decay):
@@ -62,15 +58,15 @@ def get_param_groups(model, weight_decay):
 
 def maybe_make_dir(cfg):
     """Create experiment directory if checkpointing is enabled."""
-    if not cfg.save_intermediate_checkpoints and not cfg.save_last_checkpoint:
+    if not cfg.checkpoint.save_intermediate_checkpoints and not cfg.checkpoint.save_last_checkpoint:
         return
-    if cfg.resume and cfg.resume_exp_name is None:
+    if cfg.checkpoint.resume and cfg.checkpoint.resume_exp_name is None:
         return
 
-    exp_dir = os.path.join(cfg.out_dir, cfg.exp_name)
+    exp_dir = os.path.join(cfg.out_dir, cfg.checkpoint.exp_name)
 
     if os.path.exists(exp_dir):
-        if not cfg.over_write:
+        if not cfg.checkpoint.over_write:
             raise ValueError(f"Found existing exp_dir at {exp_dir}.")
         print(f"Removing experiment dir: {exp_dir}")
         shutil.rmtree(exp_dir)
@@ -89,6 +85,8 @@ def log(
     optimizer,
     world_size,
     grad_norm=None,
+    throughput=None,
+    step_time=None,
 ):
     """Update metrics, print to console, and log to W&B."""
     if isinstance(train_loss_array, list):
@@ -98,8 +96,8 @@ def log(
 
     new_metrics = {
         "micro_step": micro_step,
-        "step": micro_step // cfg.grad_accumulation_steps,
-        "tokens": micro_step * cfg.micro_batch_size * cfg.seq_len * world_size,
+        "step": micro_step // cfg.training.grad_accumulation_steps,
+        "tokens": micro_step * cfg.training.micro_batch_size * cfg.data.seq_len * world_size,
         "lr": optimizer.param_groups[0].get("lr", float("NaN")),
         "train/loss": train_loss.item(),
         "train/loss_avg": train_loss_avg,
@@ -116,8 +114,13 @@ def log(
             grad_norm.item() if hasattr(grad_norm, "item") else grad_norm
         )
 
+    if throughput is not None:
+        new_metrics["train/throughput"] = throughput
+    if step_time is not None:
+        new_metrics["train/step_time"] = step_time
+
     for k, v in new_metrics.items():
-        metrics[k].append(v)
+        metrics.setdefault(k, []).append(v)
 
     msg = " | ".join(
         f"{key}: {value:.3e}" if isinstance(value, float) else f"{key}: {value}"
@@ -125,7 +128,7 @@ def log(
     )
     print(msg)
 
-    if cfg.wandb_log:
+    if cfg.logging.wandb_log:
         import wandb
 
         wandb.log(dict(new_metrics))

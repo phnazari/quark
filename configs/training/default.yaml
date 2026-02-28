@@ -1,0 +1,26 @@
+steps_budget: 19064
+micro_batch_size: 16
+eval_every_steps: 200
+log_every_steps: 100
+grad_accumulation_steps: 2
+num_workers: 17
+sampler: stateful_random
+sampler_seed: 42
+# Optimizer
+optim: adamw
+fused_optim: false
+lr: 7e-4
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.95
+grad_clip: 1.0
+eps: 1e-15
+# Scheduler
+scheduler: warmup_cosine
+warmup_steps: 950
+cooldown_steps: null
+lr_start: 0.0
+lr_end: null
+lr_end_pct: 0.1
+# Early stopping
+early_stopping_patience: 0

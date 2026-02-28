@@ -1,0 +1,8 @@
+save_last_checkpoint: true
+save_intermediate_checkpoints: true
+save_every_steps: 1000
+resume: false
+resume_step: null
+resume_exp_name: null
+over_write: true
+exp_name: default

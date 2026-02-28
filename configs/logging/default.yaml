@@ -1,0 +1,3 @@
+wandb_log: true
+wandb_project: quark
+wandb_log_layer_stats: false

@@ -7,7 +7,7 @@ from checkpoint_utils import match_state_dict_keys, maybe_load_checkpoint
 from lm_eval.api.registry import register_model
 from lm_eval.models.huggingface import HFLM
 from models import DeltaNet, DeltaNetWrapperConfig, Transformer, TransformerConfig
-from utils import flatten_config
+from omegaconf import OmegaConf
 
 
 def build_model_for_eval(config_name, model_overrides=None):
@@ -18,7 +18,7 @@ def build_model_for_eval(config_name, model_overrides=None):
         model_overrides (dict, optional): Model overrides.
 
     Returns:
-        tuple: (model, flat_cfg)
+        tuple: (model, cfg)
     """
     with hydra.initialize(version_base=None, config_path="../configs"):
         # We override the model if specified, e.g., model=delta_net
@@ -28,9 +28,8 @@ def build_model_for_eval(config_name, model_overrides=None):
                 overrides.append(f"model.{k}={v}")
 
         cfg = hydra.compose(config_name="config", overrides=overrides)
-        flat_cfg = flatten_config(cfg)
 
-        vocab_size = flat_cfg.vocab_size if hasattr(flat_cfg, "vocab_size") else 50304
+        vocab_size = cfg.data.vocab_size
         model_type = cfg.model.model_type
 
         if model_type == "delta_net":
@@ -46,7 +45,7 @@ def build_model_for_eval(config_name, model_overrides=None):
                 use_short_conv=cfg.model.use_short_conv,
                 conv_size=cfg.model.conv_size,
             )
-            return DeltaNet(config), flat_cfg
+            return DeltaNet(config), cfg
 
         config = TransformerConfig(
             vocab_size=vocab_size,
@@ -54,11 +53,11 @@ def build_model_for_eval(config_name, model_overrides=None):
             num_layers=cfg.model.num_layers,
             num_heads=cfg.model.num_heads,
             head_dim=cfg.model.head_dim,
-            block_size=flat_cfg.seq_len,
+            block_size=cfg.data.seq_len,
             dropout=cfg.model.dropout,
             bias=cfg.model.bias,
         )
-        return Transformer(config), flat_cfg
+        return Transformer(config), cfg
 
 
 @register_model("quark")
@@ -75,6 +74,7 @@ class QuarkLM(HFLM):
         dtype="bfloat16",
         **kwargs,
     ):
+        """Initialize QuarkLM for evaluation."""
         # 1. Build model and load checkpoint
         # Extract Quark-specific kwargs to avoid passing them to HFLM
         custom_kwargs = [
@@ -95,27 +95,40 @@ class QuarkLM(HFLM):
             if k in kwargs:
                 model_overrides[k] = kwargs.pop(k)
 
-        model_wrapper, flat_cfg = build_model_for_eval(config, model_overrides)
+        model_wrapper, cfg = build_model_for_eval(config, model_overrides)
 
-        # Configure flat_cfg for maybe_load_checkpoint
-        flat_cfg.resume = True
+        # Configure cfg for maybe_load_checkpoint
+        cfg_override = OmegaConf.create({"checkpoint": {"resume": True}})
+        cfg = OmegaConf.merge(cfg, cfg_override)
 
         # Determine out_dir and exp_name
         if os.path.isabs(checkpoint):
-            flat_cfg.out_dir = os.path.dirname(checkpoint)
-            flat_cfg.resume_exp_name = os.path.basename(checkpoint)
+            cfg_override = OmegaConf.create(
+                {
+                    "out_dir": os.path.dirname(checkpoint),
+                    "checkpoint": {"resume_exp_name": os.path.basename(checkpoint)},
+                }
+            )
+            cfg = OmegaConf.merge(cfg, cfg_override)
         else:
-            # Assume checkpoint is just the exp_name within the default flat_cfg.out_dir
-            flat_cfg.resume_exp_name = checkpoint
+            cfg_override = OmegaConf.create(
+                {
+                    "checkpoint": {"resume_exp_name": checkpoint},
+                }
+            )
+            cfg = OmegaConf.merge(cfg, cfg_override)
 
         # Parse step if provided
         step = model_overrides.get("step")
         if step is not None:
-            flat_cfg.resume_step = int(step)
-        else:
-            flat_cfg.resume_step = None
+            cfg_override = OmegaConf.create(
+                {
+                    "checkpoint": {"resume_step": int(step)},
+                }
+            )
+            cfg = OmegaConf.merge(cfg, cfg_override)
 
-        ckpt = maybe_load_checkpoint(flat_cfg)
+        ckpt = maybe_load_checkpoint(cfg)
         if ckpt is None:
             raise ValueError(f"Failed to load checkpoint for {checkpoint}")
 
