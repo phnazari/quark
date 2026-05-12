@@ -20,6 +20,11 @@ def test_variant_name_delta_net(cfg_delta_net):
     assert get_variant_name(cfg_delta_net) == "DeltaNet"
 
 
+def test_variant_name_gla(cfg_gla):
+    """GLA config should return 'GLA'."""
+    assert get_variant_name(cfg_gla) == "GLA"
+
+
 # -- get_param_groups --------------------------------------------------------
 
 

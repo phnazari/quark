@@ -169,6 +169,15 @@ def test_delta_net_model_override(cfg_delta_net):
     assert cfg_delta_net.model.num_layers == 23
 
 
+def test_gla_model_override(cfg_gla):
+    """model=gla should switch to gla config."""
+    assert cfg_gla.model.model_type == "gla"
+    assert cfg_gla.model.hidden_size == 1024
+    assert cfg_gla.model.num_layers == 23
+    assert cfg_gla.model.expand_k == 0.5
+    assert cfg_gla.model.use_output_gate is True
+
+
 def test_model_override_preserves_other_groups(cfg_delta_net):
     """Switching model should not affect other config groups."""
     assert cfg_delta_net.training.optim == "adamw"

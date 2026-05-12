@@ -20,7 +20,7 @@ def print_master(msg):
 def get_variant_name(cfg: DictConfig) -> str:
     """Derive variant name from model config."""
     model_type = cfg.model.model_type
-    names = {"transformer": "Transformer", "delta_net": "DeltaNet"}
+    names = {"transformer": "Transformer", "delta_net": "DeltaNet", "gla": "GLA"}
     return names.get(model_type, model_type)
 
 

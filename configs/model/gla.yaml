@@ -1,0 +1,9 @@
+model_type: gla
+hidden_size: 1024
+num_layers: 23
+num_heads: 8
+expand_k: 0.5
+expand_v: 1.0
+use_short_conv: false
+conv_size: 4
+use_output_gate: true

@@ -10,3 +10,10 @@ try:
     __all__ += ["DeltaNet", "DeltaNetWrapperConfig"]
 except ImportError:
     pass
+
+try:
+    from .gla import GLA, GLAWrapperConfig
+
+    __all__ += ["GLA", "GLAWrapperConfig"]
+except ImportError:
+    pass

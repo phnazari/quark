@@ -71,6 +71,12 @@ Train DeltaNet:
 .venv/bin/python train.py model=delta_net
 ```
 
+Train GLA (Gated Linear Attention):
+
+```bash
+.venv/bin/python train.py model=gla
+```
+
 Scale to multiple GPUs with DDP:
 
 ```bash

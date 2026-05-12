@@ -17,3 +17,10 @@ def cfg_delta_net() -> DictConfig:
     """Return config with model=delta_net."""
     with initialize(version_base=None, config_path="../configs"):
         return compose(config_name="config", overrides=["model=delta_net"])
+
+
+@pytest.fixture()
+def cfg_gla() -> DictConfig:
+    """Return config with model=gla."""
+    with initialize(version_base=None, config_path="../configs"):
+        return compose(config_name="config", overrides=["model=gla"])

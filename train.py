@@ -3,6 +3,7 @@
 Usage:
     python train.py
     python train.py model=delta_net
+    python train.py model=gla
     python train.py training.steps_budget=10000
     python train.py training.optim=nadamw training.scheduler=wsd training.cooldown_steps=100
     torchrun --standalone --nproc_per_node=4 train.py
@@ -16,7 +17,14 @@ import hydra
 from checkpoint_utils import maybe_load_checkpoint, save_checkpoint
 from data import get_dataloaders
 from engine import TorchEngine
-from models import DeltaNet, DeltaNetWrapperConfig, Transformer, TransformerConfig
+from models import (
+    GLA,
+    DeltaNet,
+    DeltaNetWrapperConfig,
+    GLAWrapperConfig,
+    Transformer,
+    TransformerConfig,
+)
 from omegaconf import DictConfig, OmegaConf
 from torch_utils import destroy_ddp, pytorch_setup
 from tqdm import tqdm
@@ -42,6 +50,20 @@ def build_model(cfg: DictConfig):
             conv_size=cfg.model.conv_size,
         )
         return DeltaNet(config), config
+
+    if model_type == "gla":
+        config = GLAWrapperConfig(
+            vocab_size=vocab_size,
+            hidden_size=cfg.model.hidden_size,
+            num_layers=cfg.model.num_layers,
+            num_heads=cfg.model.num_heads,
+            expand_k=cfg.model.expand_k,
+            expand_v=cfg.model.expand_v,
+            use_short_conv=cfg.model.use_short_conv,
+            conv_size=cfg.model.conv_size,
+            use_output_gate=cfg.model.use_output_gate,
+        )
+        return GLA(config), config
 
     config = TransformerConfig(
         vocab_size=vocab_size,

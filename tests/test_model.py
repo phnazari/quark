@@ -6,6 +6,7 @@ from models.transformer import Transformer, TransformerConfig
 
 try:
     from models.delta_net import DeltaNet, DeltaNetWrapperConfig
+    from models.gla import GLA, GLAWrapperConfig
 
     HAS_FLA = True
 except ImportError:
@@ -50,6 +51,23 @@ def test_build_model_delta_net(cfg_delta_net):
     model = DeltaNet(config)
 
     assert isinstance(model, DeltaNet)
+    assert config.hidden_size == 1024
+    assert config.num_layers == 23
+
+
+@pytest.mark.skipif(not HAS_FLA, reason="flash-linear-attention / triton not available")
+def test_build_model_gla(cfg_gla):
+    """build_model should create a GLA with correct dimensions."""
+    cfg = cfg_gla
+    config = GLAWrapperConfig(
+        vocab_size=cfg.data.vocab_size,
+        hidden_size=cfg.model.hidden_size,
+        num_layers=cfg.model.num_layers,
+        num_heads=cfg.model.num_heads,
+    )
+    model = GLA(config)
+
+    assert isinstance(model, GLA)
     assert config.hidden_size == 1024
     assert config.num_layers == 23
 
